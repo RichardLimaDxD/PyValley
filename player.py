@@ -1,7 +1,7 @@
 import pygame
 from settings import *
 from support import *
-from timer import Timer # type: ignore
+from timer import Timer   # type: ignore
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, group):
@@ -12,8 +12,9 @@ class Player(pygame.sprite.Sprite):
         self.frame_index = 0
 
         self.image = self.animations[self.status][self.frame_index]
-        
         self.rect = self.image.get_rect(center = pos)
+        self.z = layers["main"]
+
         self.direction = pygame.math.Vector2()
         self.pos = pygame.math.Vector2(self.rect.center)
         self.speed = 200
