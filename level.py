@@ -2,7 +2,7 @@ import pygame
 from settings import *
 from player import Player
 from overlay import Overlay
-from sprites import Generic, Water, WildFlower, Tree, Interaction
+from sprites import Generic, Particle, Water, WildFlower, Tree, Interaction
 from pytmx.util_pygame import load_pygame
 from support import *
 from transition import Transition
@@ -28,8 +28,6 @@ class Level:
         self.rain = Rain(self.all_sprites)
         self.raining = randint(0, 10) > 3
         self.soil_layer.raining = self.raining
-        if self.raining:
-            self.soil_layer.water_all()
 
     def setup(self):
         tmx_data = load_pygame("./setup/data/map.tmx")
@@ -89,6 +87,7 @@ class Level:
                     interaction=self.interaction_sprites,
                     soil_layer=self.soil_layer,
                 )
+
             if obj.name == "Bed":
                 Interaction(
                     (obj.x, obj.y),
@@ -109,6 +108,7 @@ class Level:
 
     def reset(self):
         self.soil_layer.update_plants()
+
         self.soil_layer.remove_water()
         self.raining = randint(0, 10) > 3
         self.soil_layer.raining = self.raining
@@ -120,10 +120,27 @@ class Level:
                 apple.kill()
             tree.create_fruit()
 
+    def plant_collision(self):
+        if self.soil_layer.plant_sprites:
+            for plant in self.soil_layer.plant_sprites.sprites():
+                if plant.harvestable and plant.rect.colliderect(self.player.hitbox):
+                    self.player_add(plant.plant_type)
+                    plant.kill()
+                    Particle(
+                        plant.rect.topleft,
+                        plant.image,
+                        self.all_sprites,
+                        z=layers["main"],
+                    )
+                    self.soil_layer.grid[plant.rect.centery // tile_size][
+                        plant.rect.centerx // tile_size
+                    ].remove("P")
+
     def run(self, dt):
         self.display_surface.fill("black")
         self.all_sprites.custom_draw(self.player)
         self.all_sprites.update(dt)
+        self.plant_collision()
 
         self.overlay.display()
 
