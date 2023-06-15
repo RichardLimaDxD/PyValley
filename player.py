@@ -70,7 +70,7 @@ class Player(pygame.sprite.Sprite):
         )
 
     def use_seed(self):
-        ...
+        self.soil_layer.plant_seed(self.target_pos, self.selected_seed)
 
     def import_assets(self):
         self.animations = {
